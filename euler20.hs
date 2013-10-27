@@ -262,8 +262,59 @@ collapse (x1:x2:xs) (y:ys) = max (x1+y) (x2+y) : collapse (x2:xs) ys
 -- problem 19: How many Sundays fell on the first of the month
 -- during the twentieth century (1 Jan 1901 to 31 Dec 2000)?
 
--- TODO: Ugh.
-          
+solution19 = length firstSundays
+-- 171
+
+type Weekday = Char
+weekdays  = [ 'S', 'M', 'T', 'W', 'R', 'F', 'A' ] :: [Weekday]
+-- 1 Jan 1901 was a Tuesday, so drop Sunday and Monday:
+weekCycle = drop 2 weekdays ++ cycle weekdays :: [Weekday]
+
+type SmallDate = (Int, Int)
+stdDays :: [SmallDate]
+stdDays   = [ (m,d) |
+						m <- [1..12],
+						d <- [1..31],
+						(m `elem` [4, 6, 9, 11]) <= (d <= 30),
+						(m == 2) <= (d <= 28)
+						]
+leapDays :: [SmallDate]
+leapDays  = [ (m,d) |
+						m <- [1..12],
+						d <- [1..31],
+						(m `elem` [4, 6, 9, 11]) <= (d <= 30),
+						(m == 2) <= (d <= 29)
+						]
+
+type Year = Int
+isLeap :: Year -> Bool
+isLeap y  = y `mod` 400 == 0 || y `mod` 100 /= 0 && y `mod` 4 == 0
+isntLeap  = not . isLeap
+years			= [1901..2000] :: [Year]
+leapYears = [ y | y <- years, isLeap y ] :: [Year]
+stdYears  = [ y | y <- years, isntLeap y ] :: [Year]
+
+type Date = (Year, SmallDate)
+stdDates  = [ (y, sd) | y <- stdYears, sd <- stdDays ] :: [Date]
+leapDates = [ (y, sd) | y <- leapYears, sd <- leapDays ] :: [Date]
+dates     = sort $ stdDates ++ leapDates :: [Date]
+
+type FullDate = (Date, Weekday)
+fullDates = zip dates weekCycle :: [FullDate]
+
+getWeekday :: FullDate -> Weekday
+getWeekday (_,w) = w
+
+getDay'' :: SmallDate -> Int
+getDay'' (_,d) = d
+getDay' :: Date -> Int
+getDay' (_,sd) = getDay'' sd
+getDay :: FullDate -> Int
+getDay (dt,_) = getDay' dt
+
+firstSundays :: [FullDate]
+firstSundays = [ s | s <- fullDates, getDay s == 1, getWeekday s == 'S' ]
+
 
 ----------------------------------
 -- problem 20: Find the sum of the digits in the number 100!
