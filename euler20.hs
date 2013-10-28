@@ -11,12 +11,12 @@ import Data.Char
 -- problem 11:
 
 
-solution11 = getResult "11.txt"
+solution11 = getResult11 "11.txt"
 -- 70600674
 
 
-getResult :: FilePath -> IO Int
-getResult fileName = do
+getResult11 :: FilePath -> IO Int
+getResult11 fileName = do
     contents <- readFile fileName
     return . hvdMax' $ toGrid contents
 
@@ -262,6 +262,10 @@ collapse (x1:x2:xs) (y:ys) = max (x1+y) (x2+y) : collapse (x2:xs) ys
 -- problem 19: How many Sundays fell on the first of the month
 -- during the twentieth century (1 Jan 1901 to 31 Dec 2000)?
 
+
+-- This solution is really verbose and silly for such a tiny problem.
+-- BUT! It works. And is very very literal.
+
 solution19 = length firstSundays
 -- 171
 
@@ -314,6 +318,37 @@ getDay (dt,_) = getDay' dt
 
 firstSundays :: [FullDate]
 firstSundays = [ s | s <- fullDates, getDay s == 1, getWeekday s == 'S' ]
+
+
+-- My original impulse was to write the following, but I got it wrong
+-- the first time I tried it. Second time's a charm, eh?
+
+solution19' = (sum . map (snd . year)) [1901..2000]
+-- 171
+
+nonLeap = [31,31,28,31,30,31,30,31,31,30,31,30]
+leap = [31,31,29,31,30,31,30,31,31,30,31,30]
+
+monthsOf y | isLeap y = leap
+           | otherwise = nonLeap
+
+year 1900 = (6,2)
+year y = h (foldl f (g,0) (monthsOf y))
+        where f (a,b) c = (a+c,b+(if mod (a+c) 7==0 then 1 else 0))
+              g = (fst . year) (y-1)
+              h (a,b) = (mod a 7,b)
+
+
+-- Of course, the most clever thing to do is as little as possible:
+import Data.Time
+import System.Locale
+
+solution19'' = length . filter (== "1 01") $ map (formatTime t "%u %d" ) [b..e]
+-- 171
+
+b = fromGregorian 1901 1 1
+e = fromGregorian 2000 12 31
+t = System.Locale.defaultTimeLocale
 
 
 ----------------------------------
