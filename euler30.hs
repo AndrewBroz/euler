@@ -10,7 +10,7 @@ import Data.Char (ord)
 ----------------------------------
 -- problem 21: Evaluate the sum of all the amicable numbers under 10000.
 
-solution21 = sum $ filter amicable [2..9999]
+solution21 = sum $ filter amicable [1..9999]
 -- 31626
 
 amicable :: Int -> Bool
@@ -18,7 +18,9 @@ amicable n = n /= n' && n == n''
     where n' = sum $ properDivisors n
           n'' = sum $ properDivisors n'
 
-properDivisors = init . divisors
+properDivisors :: Int -> [Int]
+properDivisors 0 = []
+properDivisors n = init $ divisors n
 
 divisors :: Int -> [Int]
 divisors n = xs ++ reverse (map (\x -> div n x) xs')
