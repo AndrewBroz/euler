@@ -20,7 +20,10 @@
 
 
 ----------------------------------
--- problem 35:
+-- problem 35: How many circular primes are there below one million?
+
+-- note there are thirteen such primes below 100:
+-- 2, 3, 5, 7, 11, 13, 17, 31, 37, 71, 73, 79, and 97
 
 
 ----------------------------------
