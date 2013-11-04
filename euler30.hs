@@ -91,6 +91,9 @@ solution23' = (sum [1..upperLimit23]) - (sum abundantSums)
 solution24 = (sort $ permutations "0123456789") !! 999999
 -- "2783915460" (8.12 secs, 3152813656 bytes)
 
+
+{- The original way I did this problem:
+
 -- think of representation by a factorial base, so 2*9! + 6*8! + ...
 -- so, divide by each succesive factorial and store the result in a list,
 -- which will represent these values
@@ -98,23 +101,35 @@ solution24 = (sort $ permutations "0123456789") !! 999999
 fac :: Int -> Int
 fac n = product [1..n]
 
-idxList' :: Int -> [Int] -> Int -> [Int]
-idxList' _ ls 0 = reverse (0 : ls)
-idxList' idx ls maxN = idxList' (idx `rem` (fac maxN))
+idxList :: Int -> [Int] -> Int -> [Int]
+idxList _ ls 0 = reverse (0 : ls)
+idxList idx ls maxN = idxList (idx `rem` (fac maxN))
                                 ((idx `div` (fac maxN)) : ls)
                                 (maxN - 1)
-
--- each value in idxList is the index of the needed digit in the list of
--- values remaining to choose from.
-idxList = idxList' 999999 [] 9 :: [Int]
 
 findPerm :: [Int] -> [Int] -> [Int] -> Int
 findPerm [] _ acc = sum $ zipWith (*) (map (\n->10^n) [0..]) acc
 findPerm ls idxs acc = findPerm (ls \\ [val]) (tail idxs) (val : acc)
     where val = (ls !! head idxs)
 
-solution24' = findPerm [0..9] idxList [] 
--- 2783915460 (0.01 secs, 3646096 bytes)
+solution24' = findPerm [0..9] idxs [] 
+    where idxs = idxList 999999 [] 9 :: [Int]
+-- 2783915460 (0.01 secs, 3646096 bytes) -}
+
+
+-- refactored code:
+fac n = product [1..n]
+
+findPerm [] _ = []
+findPerm xs idx = x : findPerm (delete x xs) (idx `rem` b)
+    where b = fac $ length xs - 1
+          x = xs !! (idx `div` b)
+
+-- 2783915460 (0.01 secs, 3639368 bytes)
+solution24' = sum $ zipWith (*) pwrs perm
+        where pwrs = [ 10^n | n <- [0..] ]
+              perm = reverse $ findPerm [0..9] 999999
+
 
 ----------------------------------
 -- problem 25: Which is the first fib with more than 1000 digits?
@@ -159,16 +174,65 @@ solution25 = head $ filter (\x -> fib x > 10^999) [1..]
 ----------------------------------
 -- problem 26:
 
+-- *Main> let ls = reverse $ takeWhile (<1000) primes
+-- *Main> head $ filter (\p -> (mod (10^(div (p-1) 2) - 1) p) /= 0) ls
+-- 983
 
-
+-- uses primes defined below
+solution26 = head $ filter (\p -> (mod (10^(div (p-1) 2) - 1) p) /= 0) ls
+    where ls = reverse $ takeWhile (<1000) primes
 
 ----------------------------------
 -- problem 27:
 
+-- a nice corecursive definition of primes
+primes :: [Integer]
+primes = 2 : filter isPrime [3,5..]
+
+primeFactors :: Integer -> [Integer]
+primeFactors n = factor n primes
+    where factor n (p:ps) 
+            | p * p > n      = [n]
+            | n `mod` p == 0 = p : factor (n `div` p) (p:ps)
+            | otherwise      = factor n ps
+
+isPrime :: Integer -> Bool
+isPrime n = n > 1 && 1 == (length $ primeFactors n)
+
+candidateList :: [(Integer, Integer)]
+candidateList =  [ (a, b) |
+                 b <- takeWhile (< 1000) primes,
+                 a <- [(-b), ((-b) + 2) .. 999],
+                 isPrime $ 1 + a + b
+                 ]
+
+seqLen :: (Integer, Integer) -> Int 
+seqLen (a,b) = length $ takeWhile (\n -> isPrime $ n^2 + a * n + b) [0..]
+
+findLg :: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
+findLg (a,b) (c,d) | seqLen (a,b) >= seqLen (c,d) = (a,b)
+                   | otherwise                    = (c,d)
+
+solution27 = let (a,b) = foldl1' findLg candidateList in (a * b, (a, b))
+
+-- observation: (b^2 + a*b + b) is never prime, so once b is less than the
+-- longest sequence generated we have the answer. This can be optimized to
+-- use this fact.
+-- TODO Refactor and optimize code
 
 ----------------------------------
 -- problem 28:
 
+-- sum $ scanl (+) 1 [ 2 * floor(1 + 0.25 * fromIntegral n)| n <- [0..1999]]
+-- 1 + 4 * sum [n * (4 * n + 1) + 1 | n <- [1..500]]
+-- (4*x^3 + 3*x^2 + 8*x - 9) `div` 6
+
+solution28 = sum $ diagonals 1001
+
+diagonals :: Integer -> [Integer]
+diagonals x = scanl (+) 1 incList
+    where incList = [ stepFun n | n <- [ 0 .. 2 * x - 3 ] ]
+          stepFun n = 2 * floor(1 + 0.25 * fromIntegral n) 
 
 ----------------------------------
 -- problem 29:
@@ -194,7 +258,7 @@ fifthPowerSum 0 = 0
 fifthPowerSum n = (n `rem` 10)^5 + fifthPowerSum (n `div` 10)
 
 solution30 = sum $ filter (\n -> n == fifthPowerSum n) [2..bound30]
--- 443839
+-- 443839i (2.19 secs, 1582552168 bytes)
 
 -- the simple solution is already okay, but an interesting
 -- observation: numbers with the same digits have the same sums, so it is
@@ -211,7 +275,7 @@ sixDigitCollections = tail [ [a,b,c,d,e,f] |
 fifthPowerSum' :: [Int] -> Int
 fifthPowerSum' = sum . map (^5)
 
--- very fast solution
+-- very fast solution: 443839 (0.07 secs, 57925400 bytes)
 solution30' = sum $ map f sixDigitCollections
     where l = length . show . fifthPowerSum'
           addZeros xs = xs ++ take (6 - l xs) (repeat 0)
