@@ -277,24 +277,24 @@ weekCycle = drop 2 weekdays ++ cycle weekdays :: [Weekday]
 type SmallDate = (Int, Int)
 stdDays :: [SmallDate]
 stdDays   = [ (m,d) |
-						m <- [1..12],
-						d <- [1..31],
-						(m `elem` [4, 6, 9, 11]) <= (d <= 30),
-						(m == 2) <= (d <= 28)
-						]
+            m <- [1..12],
+            d <- [1..31],
+            (m `elem` [4, 6, 9, 11]) <= (d <= 30),
+            (m == 2) <= (d <= 28)
+            ]
 leapDays :: [SmallDate]
 leapDays  = [ (m,d) |
-						m <- [1..12],
-						d <- [1..31],
-						(m `elem` [4, 6, 9, 11]) <= (d <= 30),
-						(m == 2) <= (d <= 29)
-						]
+            m <- [1..12],
+            d <- [1..31],
+            (m `elem` [4, 6, 9, 11]) <= (d <= 30),
+            (m == 2) <= (d <= 29)
+            ]
 
 type Year = Int
 isLeap :: Year -> Bool
 isLeap y  = y `mod` 400 == 0 || y `mod` 100 /= 0 && y `mod` 4 == 0
 isntLeap  = not . isLeap
-years			= [1901..2000] :: [Year]
+years           = [1901..2000] :: [Year]
 leapYears = [ y | y <- years, isLeap y ] :: [Year]
 stdYears  = [ y | y <- years, isntLeap y ] :: [Year]
 
