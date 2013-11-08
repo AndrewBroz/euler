@@ -2,11 +2,24 @@
 -- Project Euler problems 41-50 --
 ----------------------------------
 
+import Data.List
 import Data.Char (ord)
 
 ----------------------------------
 -- problem 41:
 
+isPrime :: Integral a => a -> Bool
+isPrime x = not . any divisible . takeWhile small $ 2 : [3,5..] where
+     divisible y = mod x y == 0
+     small y     = y * y <= x
+
+listToNumber :: Integral a => [a] -> a
+listToNumber = foldl' (\a b -> 10*a+b) 0
+
+candidates :: Integral a => [a]
+candidates = map listToNumber . reverse . sort $ permutations [1..7]
+
+solution41 = head $ filter isPrime candidates
 
 ----------------------------------
 -- problem 42:
@@ -30,7 +43,7 @@ getResult42 fileName = do
     contents <- readFile fileName
     return . length . filter (isTriNum . wordToValue) $ toWordList contents
 
-solution42 = getResult42 "words.txt"
+solution42 = getResult42 "42.txt"
 -- 162 (0.03 secs, 55949704 bytes)
 
 ----------------------------------
