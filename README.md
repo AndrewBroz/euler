@@ -14,7 +14,7 @@ those of you that care about such things. You have been warned.
 
 ![solved][badge]
 
-[pe]: http://projecteuler.net
-[about]: http://projecteuler.net/about 
-[hs]: http://www.haskell.org/haskellwiki/Haskell 
+[pe]: http://projecteuler.net "Project Euler"
+[about]: http://projecteuler.net/about "Project Euler: About"
+[hs]: http://www.haskell.org/haskellwiki/Haskell "Haskell.org"
 [badge]: http://projecteuler.net/profile/abroz.png "abroz"
