@@ -12,9 +12,7 @@ Google search, I see no harm in making mine available as well.
 It goes without saying that these solutions contain **SPOILERS** for 
 those of you that care about such things. You have been warned.
 
-![solved][badge]
 
 [pe]: http://projecteuler.net "Project Euler"
 [about]: http://projecteuler.net/about "Project Euler: About"
 [hs]: http://www.haskell.org/haskellwiki/Haskell "Haskell.org"
-[badge]: http://projecteuler.net/profile/abroz.png "abroz"
